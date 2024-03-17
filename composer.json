@@ -1,0 +1,18 @@
+{
+	"name": "fernandothedev/mydb-php",
+	"description": "Um Banco de Dados feito com base em MongoDB, especialmente para teste.",
+	"type": "project",
+	"license": "MIT",
+	"autoload": {
+		"psr-4": {
+			"Fernando\\MyDB\\": "src/"
+		}
+	},
+	"authors": [
+		{
+			"name": "Fernando",
+			"email": "fernandolovephp@gmail.com"
+		}
+	],
+	"require": {}
+}
