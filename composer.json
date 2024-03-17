@@ -1,7 +1,8 @@
 {
-	"name": "fernandothedev/mydb-php",
-	"description": "Um Banco de Dados feito com base em MongoDB, especialmente para teste.",
+	"name": "fernandothedev/mydb",
+	"description": "MyDB is a relational database based on JSON and Open Source, written 100% in PHP and from absolute zero, aims to guarantee speed and simplicity in its execution, with some SQL expressions changed.",
 	"type": "project",
+	"minimum-stability": "stable",
 	"license": "MIT",
 	"autoload": {
 		"psr-4": {
