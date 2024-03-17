@@ -91,5 +91,5 @@ If you want specific improvements in optimization, security and others, contact 
 ## Installation 
 ### Composer
 ```bash 
-composer require fernandothedev/mydb:main
+composer require fernandothedev/mydb:dev-main
 ```
