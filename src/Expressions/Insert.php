@@ -2,29 +2,38 @@
 
 namespace Fernando\MyDB\Expressions;
 
-final class Insert
+use Fernando\MyDB\Cli\{
+	Color,
+	Printer
+};
+
+class Insert
 {
 	private string $dirBase = __DIR__ . '/../../db/';
 
 	public function run(array $expression): void
 	{
 		if (count($expression) < 3) {
-			echo "Sintaxe inválida. Uso correto: INSERT INTO <banco_de_dados.tabela> VALUES (<valores>).\n";
+			Printer::getInstance()->out(Color::Fg(88, "Sintaxe inválida. Uso correto: INSERT INTO <banco_de_dados.tabela> VALUES (<valores>)."));
+			Printer::getInstance()->newLine();
 			return;
 		}
 
 		if (strtoupper($expression[0]) !== "INTO") {
-			echo "Invalid expression '$expression[0]'.\n";
+			Printer::getInstance()->out(Color::Fg(200, "Invalid expression '$expression[0]'"));
+			Printer::getInstance()->newLine();
 			return;
 		}
 
 		if (!str_contains($expression[1], '.')) {
-			echo "Invalid expression '$expression[1]'.\n";
+			Printer::getInstance()->out(Color::Fg(200, "Invalid expression '$expression[1]'"));
+			Printer::getInstance()->newLine();
 			return;
 		}
 
 		if (strtoupper($expression[2]) !== "VALUES") {
-			echo "Invalid expression '$expression[2]'.\n";
+			Printer::getInstance()->out(Color::Fg(200, "Invalid expression '$expression[2]'"));
+			Printer::getInstance()->newLine();
 			return;
 		}
 
@@ -41,14 +50,16 @@ final class Insert
 
 
 		if (!is_dir($this->dirBase . $dbName)) {
-			echo "Database não existe '{$dbName}'.\n";
+			Printer::getInstance()->out(Color::Fg(88, "Database '$dbName' does not exist."));
+			Printer::getInstance()->newLine();
 			return;
 		}
 
 		$tableFile = $this->dirBase . $dbName . '/' . $tableName . '.json';
 
 		if (!file_exists($tableFile)) {
-			echo "Tabela não existe '{$tableName}'.\n";
+			Printer::getInstance()->out(Color::Fg(88, "Table '{$tableName}' does not exist."));
+			Printer::getInstance()->newLine();
 			return;
 		}
 
@@ -90,13 +101,16 @@ final class Insert
 		}
 
 		if (count($data) !== count($columns)) {
-			echo "Amount of data is different from " . count($columns) . PHP_EOL;
+			Printer::getInstance()->out(Color::Fg(88, "Amount of data is different from " . count($columns) . "."));
+			Printer::getInstance()->newLine();
 			return;
 		}
 
 		$tableData['data'][] = $data;
 		file_put_contents($tableFile, json_encode($tableData, JSON_PRETTY_PRINT));
-		echo "Valores inseridos em '{$dbName}.{$tableName}'.\n";
+		Printer::getInstance()->out(Color::Fg(200, "Inserted value in table '{$tableName}'."));
+		Printer::getInstance()->newLine();
+
 	}
 
 	private function getDatabaseAndTableName(string $expression): array
