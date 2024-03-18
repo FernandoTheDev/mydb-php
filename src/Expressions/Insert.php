@@ -91,13 +91,13 @@ class Insert
 				break;
 			}
 
-			if ($part[$i + 1] === ")") {
-				$part = str_replace(")", "", $part);
-				$data[$columns[$i]] = $part;
+			if (strlen($part) > 1 and $part[$i + 1] === ")") {
+		
+				$data[$columns[$i]] = str_replace(")", "", $part);
 				break;
 			}
 
-			$data[$columns[$i]] = $part;
+			$data[$columns[$i]] = str_replace(")", "", $part);
 		}
 
 		if (count($data) !== count($columns)) {
