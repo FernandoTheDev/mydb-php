@@ -2,29 +2,31 @@
 
 namespace Fernando\MyDB\Expressions;
 
-use Fernando\MyDB\Utils\Logger;
+use Fernando\MyDB\Cli\{
+	Color,
+	Printer
+};
 
-final class Select
+class Select
 {
 	private string $reservedWord = "FROM";
 	private string $dirBase = __DIR__ . '/../../db/';
 
 	public function run(array $expression): void
 	{
-		$logger = new Logger;
 		if (empty($expression)) {
-			$logger->error("Invalid expression '{$expression}'.");
+			Printer::getInstance()->out(Color::Fg(200, "Invalid expression '{$expression}'."));
 			return;
 		}
 
 		$fromIndex = array_search(strtoupper($this->reservedWord), array_map('strtoupper', $expression));
 		if ($fromIndex === false) {
-			$logger->error("'FROM' not found in expression '{$expression}'.");
+			Printer::getInstance()->out(Color::Fg(200, "'FROM' not found in expression '{$expression}'."));
 			return;
 		}
 
 		if (!isset($expression[$fromIndex + 1])) {
-			$logger->error("The table was not passed '{$expression}'.");
+			Printer::getInstance()->out(Color::Fg(200, "The table was not passed '{$expression}'."));
 			return;
 		}
 
@@ -47,23 +49,22 @@ final class Select
 
 	private function processSelect(array $selects, string $table, array $expression): void
 	{
-		$logger = new Logger;
 		if (empty($selects)) {
-			$logger->error("The selection type was not passed '" . implode(" ", $expression) . "'.");
+			Printer::getInstance()->out(Color::Fg(200, "The selection type was not passed '" . implode(" ", $expression) . "'."));
 			return;
 		}
 
 		list($dbName, $tableName) = $this->getDatabaseAndTableName($table);
 
 		if (!is_dir($this->dirBase . $dbName)) {
-			$logger->error("Database not exists '{$dbName}'.");
+			Printer::getInstance()->out(Color::Fg(88, "Database not exists '{$dbName}'."));
 			return;
 		}
 
 		$tableFile = $this->dirBase . $dbName . '/' . $tableName . '.json';
 
 		if (!file_exists($tableFile)) {
-			$logger->error("Table not exists '{$dbName}.{$tableName}'.");
+			Printer::getInstance()->out(Color::Fg(88, "Table not exists '{$dbName}.{$tableName}'."));
 			return;
 		}
 
@@ -96,48 +97,46 @@ final class Select
 
 	private function all(array $name, array $expression, array $tableData): void
 	{
-		$logger = new Logger;
 		list($dbName, $tableName) = $name;
 
 		foreach ($tableData["data"] as $columnName => $columnData) {
-			$logger->success("{$columnName}:");
+			Printer::getInstance()->out(Color::Bg(100, "{$columnName}:"));
 			foreach ($columnData as $key => $value) {
 				echo "  - {$key}: {$value}\n";
 			}
 			echo PHP_EOL;
 		}
 
-		$logger->println("All table data from '{$dbName}.{$tableName}'.");
+		Printer::getInstance()->out(Color::Bg(100, "All table data from '{$dbName}.{$tableName}'."));
+		Printer::getInstance()->newLine();
 	}
 
 	private function especific(array $selects, array $name, array $tableData): void
 	{
-		$logger = new Logger;
 		list($dbName, $tableName) = $name;
 
 		foreach ($selects as $select) {
 			if (isset($tableData["data"][$select])) {
-				$logger->success("{$select}:");
+				Printer::getInstance()->out(Color::Bg(100, "{$select}:"));
 				foreach ($tableData["data"][$select] as $key => $value) {
 					echo "  - {$key}: {$value}\n";
 				}
 				echo PHP_EOL;
 			} else {
-				$logger->error("'{$select}' not found in table '{$dbName}.{$tableName}'.");
+				Printer::getInstance()->out(Color::Fg(88, "Field '{$select}' not found in table '{$dbName}.{$tableName}'."));
 			}
 		}
 	}
 
 	private function allWithWhere(array $name, array $tableData, string $whereField, string $whereOperator, string $whereValue): void
 	{
-		$logger = new Logger;
 		list($dbName, $tableName) = $name;
 		$fieldFound = false;
 
 		foreach ($tableData["data"] as $columnName => $columnData) {
 			if (isset($columnData[$whereField]) && $this->evaluateCondition($columnData[$whereField], $whereOperator, $whereValue)) {
 				$fieldFound = true;
-				$logger->success("{$columnName}:");
+				Printer::getInstance()->out(Color::Bg(100, "{$columnName}:"));
 				foreach ($columnData as $cK => $cD) {
 					echo "  - {$cK}: {$cD}\n";
 				}
@@ -146,20 +145,19 @@ final class Select
 		}
 
 		if (!$fieldFound) {
-			$logger->warning("No data was found for the condition '{$whereField} {$whereOperator} {$whereValue}' in '{$dbName}.{$tableName}'.");
+			Printer::getInstance()->out(Color::Fg(88, "No data was found for the condition '{$whereField} {$whereOperator} {$whereValue}' in '{$dbName}.{$tableName}'."));
 		}
 	}
 
 	private function especificWithWhere(array $selects, array $name, array $tableData, string $whereField, string $whereOperator, string $whereValue): void
 	{
-		$logger = new Logger;
 		list($dbName, $tableName) = $name;
 		$fieldFound = false;
 
 		foreach ($tableData["data"] as $columnName => $columnData) {
 			if (isset($columnData[$whereField]) && $this->evaluateCondition($columnData[$whereField], $whereOperator, $whereValue)) {
 				$fieldFound = true;
-				$logger->success("{$columnName}:");
+				Printer::getInstance()->out(Color::Bg(100, "{$columnName}:"));
 				foreach ($selects as $select) {
 					if (isset($columnData[$select])) {
 						echo "  - {$select}: {$columnData[$select]}\n";
@@ -172,7 +170,7 @@ final class Select
 		}
 
 		if (!$fieldFound) {
-			$logger->warning("No data was found for the condition '{$whereField} {$whereOperator} {$whereValue}' in '{$dbName}.{$tableName}'.");
+			Printer::getInstance()->out(Color::Fg(88, "No data was found for the condition '{$whereField} {$whereOperator} {$whereValue}' in '{$dbName}.{$tableName}'."));
 		}
 	}
 

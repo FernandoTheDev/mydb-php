@@ -2,24 +2,27 @@
 
 namespace Fernando\MyDB;
 
-use Fernando\MyDB\Expressions\Select;
-use Fernando\MyDB\Expressions\Create;
-use Fernando\MyDB\Expressions\Insert;
-use Fernando\MyDB\Expressions\Show;
-use Fernando\MyDB\Expressions\Delete;
-use Fernando\MyDB\Expressions\Update;
-use Fernando\MyDB\Utils\Logger;
+use Fernando\MyDB\Cli\Color;
+use Fernando\MyDB\Cli\Printer;
+use Fernando\MyDB\Expressions\{
+	Show,
+	Select,
+	Create,
+	Delete,
+	Update,
+	Insert,
+};
 
-final class Parser
+class Parser
 {
 	private array $keywords = [];
 
 	public function __construct() {
 		$this->keywords = [
+			"SHOW"   => new Show,
 			"SELECT" => new Select,
 			"CREATE" => new Create,
 			"INSERT" => new Insert,
-			"SHOW" => new Show,
 			"DELETE" => new Delete,
 			"UPDATE" => new Update,
 		];
@@ -27,7 +30,6 @@ final class Parser
 
 	public function parserAndInterpreter(string $expression): void
 	{
-		$logger = new Logger;
 		/**
 		* A Primeira expressão tem obrigatoriamente que ser um  Keyword ou um Comentário.
 		*/
@@ -36,7 +38,7 @@ final class Parser
 		$dataPointer = [];
 		$openInit = false;
 
-		foreach ($expression as $key => $value) {
+		foreach ($expression as $_ => $value) {
 			$trimmedValue = trim($value);
 			$tokens = explode(" ", $trimmedValue);
 			$keyword = $tokens[0];
@@ -71,6 +73,8 @@ final class Parser
 				array_shift($tokens);
 
 				$tokenize = implode(" ", $tokens);
+
+				Printer::getInstance()->Display(Color::Fg(82, "Executing: " . $tokenize));
 				$this->keywords[$upperKeyword]->run($tokens);
 
 				array_shift($expression);
@@ -112,7 +116,7 @@ final class Parser
 			}
 
 			/* Não identificado. */
-			$logger->warning("Invalid keyword '{$keyword}'.");
+			Printer::getInstance()->Display(Color::Fg(196, "Keyword '{$keyword}' not found."));
 			array_shift($expression);
 		}
 

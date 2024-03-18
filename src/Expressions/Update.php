@@ -2,9 +2,13 @@
 
 namespace Fernando\MyDB\Expressions;
 
-use Fernando\MyDB\Utils\Logger;
+use Fernando\MyDB\Cli\{
+	Color,
+	Printer
+};
 
-final class Update
+
+class Update
 {
 	private string $reservedWordSet = "SET";
 	private string $reservedWordWhere = "WHERE";
@@ -12,9 +16,8 @@ final class Update
 
 	public function run(array $expression, ?string $databaseName = ""): void
 	{
-		$logger = new Logger;
 		if (empty($expression)) {
-			$logger->fatal("Invalid expression '{$expression}'.");
+			Printer::getInstance()->display("Invalid expression '{$expression}'.");
 			return;
 		}
 
@@ -88,19 +91,18 @@ final class Update
 
 	private function processUpdate(string $tableName, array $setData, array $whereData, ?string $databaseName = ""): void
 	{
-		$logger = new Logger;
 		if ($databaseName == "") {
 			list($dbName, $tableName) = $this->getDatabaseAndTableName($tableName);
 
 			if (!is_dir($this->dirBase . $dbName)) {
-				$logger->error("Database not exists '{$dbName}'.");
+				Printer::getInstance()->display(Color::Bg(200, "Database not exists '{$dbName}'."));
 				return;
 			}
 		} else {
 			$dbName = $databaseName;
 
 			if (!is_dir($this->dirBase . $dbName)) {
-				$logger->error("Database not exists '{$dbName}'.");
+				Printer::getInstance()->display(Color::Bg(200, "Database not exists '{$dbName}'."));
 				return;
 			}
 		}
@@ -108,7 +110,7 @@ final class Update
 		$tableFile = $this->dirBase . $dbName . '/' . $tableName . '.json';
 
 		if (!file_exists($tableFile)) {
-			$logger->error("Table not exists '{$dbName}.{$tableName}'.");
+			Printer::getInstance()->display(Color::Bg(200, "Table not exists '{$dbName}.{$tableName}'."));
 			return;
 		}
 
@@ -119,7 +121,6 @@ final class Update
 
 	private function performUpdate(array &$tableData, array $setData, array $whereData, string $tableFile): void
 	{
-		$logger = new Logger;
 		foreach ($tableData["data"] as &$row) {
 			$updateRow = true;
 			foreach ($whereData as $condition) {
@@ -135,6 +136,8 @@ final class Update
 				}
 			}
 		}
+
+		Printer::getInstance()->display(Color::Bg(100, "Updated successfully."));
 
 		file_put_contents($tableFile, json_encode($tableData, JSON_PRETTY_PRINT));
 	}

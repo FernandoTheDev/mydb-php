@@ -2,17 +2,19 @@
 
 namespace Fernando\MyDB\Expressions;
 
-use Fernando\MyDB\Utils\Logger;
+use Fernando\MyDB\Cli\{
+	Color,
+	Printer
+};
 
-final class Show
+class Show
 {
 	private string $dirBase = __DIR__ . '/../../db/';
 
 	public function run(array $expression): void
 	{
-		$logger = new Logger;
 		if (count($expression) < 1) {
-			$logger->error("Invalid expression '{$expression}'.");
+			Printer::getInstance()->display("Invalid expression '{$expression}'.");
 			return;
 		}
 
@@ -30,29 +32,29 @@ final class Show
 				$this->showTable($expression);
 				break;
 				default:
-			$logger->warning("Comando inválido: '{$command}'.");
+			Printer::getInstance()->display(Color::Bg(205, "Invalid parameter '{$command}'."));
 			break;
 		}
 	}
 
 	private function showDatabase(array $expression): void
 	{
-		$logger = new Logger;
 		$folders = scandir($this->dirBase);
 		array_shift($folders);
 		array_shift($folders);
 
 		if (count($folders) == 0) {
-			$logger->println("We don't have databases to show.");
+			Printer::getInstance()->display(Color::Bg(106, "We don't have databases to show."));
 			return;
 		}
 
 		foreach ($folders as $folder) {
-			$logger->println("- " . $folder);
+			Printer::getInstance()->out(Color::Bg(201, "- " . $folder));
+			Printer::getInstance()->newLine();
 		}
 
-		$logger->ln();
-		$logger->success("Database Total '" . count($folders) . "'.");
+		Printer::getInstance()->newLine();
+		Printer::getInstance()->out(Color::Bg(100, "Databases Total '" . count($folders) . "'."));
 	}
 
 	private function showTable(array $expression): void
@@ -60,7 +62,6 @@ final class Show
 		$dir = $this->dirBase;
 		$folders = scandir($dir);
 		$filesQtd = 0;
-		$logger = new Logger;
 
 		if (!count($expression) < 1) {
 			$files = scandir($dir . $expression[0] . '/');
@@ -68,17 +69,18 @@ final class Show
 			array_shift($files);
 
 			if (count($files) == 0) {
-				$logger->println("We don't have tables to show.");
+				Printer::getInstance()->display(Color::Bg(106, "We don't have tables to show."));
 				return;
 			}
 
-			$logger->success($expression[0]);
+			Printer::getInstance()->display(Color::Bg(2, $expression[0]));
+
 			foreach ($files as $file) {
 				$file = str_replace(".json", "", $file);
-				$logger->println("   - " . $file);
+				Printer::getInstance()->display(Color::Bg(205, "   - " . $file));
 			}
-			$logger->ln();
-			$logger->success("Tables Total '" . count($files) . "'.");
+			Printer::getInstance()->newLine();
+			Printer::getInstance()->display(Color::Bg(100, "Tables Total '" . count($files) . "'."));
 			return;
 		}
 
@@ -86,7 +88,7 @@ final class Show
 		array_shift($folders);
 
 		if (count($folders) == 0) {
-			$logger->println("We don't have databases to show the tables.");
+			Printer::getInstance()->display(Color::Bg(106, "We don't have databases to show."));
 			return;
 		}
 
@@ -97,34 +99,30 @@ final class Show
 			$filesQtd += count($files);
 
 			if (count($files) < 1) {
-				$logger->println($folder);
-				$logger->ln();
+				Printer::getInstance()->out(Color::Bg(201, "- " . $folder));
+				Printer::getInstance()->newLine();
 				continue;
 			}
 
-			$logger->success($folder);
+			Printer::getInstance()->out(Color::Bg(201, "- " . $folder));
+
 			foreach ($files as $file) {
 				if ($file == "") {
 					continue;
 				}
 				$file = str_replace(".json", "", $file);
-				$logger->println("   - " . $file);
+				Printer::getInstance()->newLine();
+				Printer::getInstance()->out(Color::Bg(205, "   - " . $file));
 			}
-			$logger->ln();
+			Printer::getInstance()->newLine();
 		}
 
-		$logger->success("Tables Total '{$filesQtd}'.");
-		$logger->success("Database Total '" . count($folders) . "'.");
-	}
+		$foldersCount = count($folders);
 
-	private function getDatabaseName(array $expression): string
-	{
-		return $expression[0];
-	}
-
-	private function getDatabaseAndTableName(array $expression): array
-	{
-		return explode(".", $expression[0]);
+		Printer::getInstance()->newLine();
+		Printer::getInstance()->out(Color::Bg(100, "Tables Total '{$filesQtd}'."));
+		Printer::getInstance()->newLine();
+		Printer::getInstance()->out(Color::Bg(100, "Databases Total '{$foldersCount}'."));
 	}
 
 	private function parseTableData(array $expression): array
@@ -153,5 +151,15 @@ final class Show
 		}
 
 		return $data;
+	}
+
+	private function getDatabaseName(array $expression): string
+	{
+		return $expression[0];
+	}
+
+	private function getDatabaseAndTableName(array $expression): array
+	{
+		return explode(".", $expression[0]);
 	}
 }

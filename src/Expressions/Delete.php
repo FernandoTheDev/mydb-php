@@ -2,17 +2,19 @@
 
 namespace Fernando\MyDB\Expressions;
 
-use Fernando\MyDB\Utils\Logger;
+use Fernando\MyDB\Cli\{
+	Color,
+	Printer
+};
 
-final class Delete
+class Delete
 {
 	private string $dirBase = __DIR__ . '/../../db/';
 
 	public function run(array $expression): void
 	{
-		$logger = new Logger;
 		if (count($expression) < 1) {
-			$logger->error("Invalid expression '{$expression}'.");
+			Printer::getInstance()->out(Color::Fg(200, "Invalid expression '{$expression}'."));
 			return;
 		}
 
@@ -29,49 +31,49 @@ final class Delete
 				array_shift($expression);
 				$this->table($expression);
 				break;
-			$logger->warning("Comando inválido: '{$command}'.");
+			Printer::getInstance()->out(Color::Fg(88, "Comando inválido: '{$command}'."));
 			break;
 		}
 	}
 
 	private function table(array $expression): void
 	{
-		$logger = new Logger;
 
-		foreach ($expression as $db => $exp) {
+		foreach ($expression as $_ => $exp) {
 			list($dbName, $tableName) = $this->getDatabaseAndTableName($exp);
 			$dir = $this->dirBase . $dbName;
 			$file = $dir . '/' . $tableName . '.json';
 
 			if (!is_dir($dir)) {
-				$logger->error("Database not found '{$dbName}'.");
+				Printer::getInstance()->out(Color::Fg(200, "Database not found '{$dbName}'."));
 				return;
 			}
 
 			if (!file_exists($file)) {
-				$logger->error("Table not found '{$dbName}.{$tableName}'.");
+				Printer::getInstance()->out(Color::Fg(200, "Table not found '{$dbName}.{$tableName}'."));
 				return;
 			}
 
 			unlink($file);
-			$logger->success("Table excluded '{$dbName}.{$tableName}'.");
+			Printer::getInstance()->out(Color::Fg(100, "Table deleted '{$dbName}.{$tableName}'."));
 		}
 	}
 
 	private function database(array $expression): void
 	{
-		$logger = new Logger;
 
 		foreach ($expression as $db => $exp) {
 			$dir = $this->dirBase . $exp;
 
 			if (!is_dir($dir)) {
-				$logger->error("Database not found '{$exp}'.");
+				Printer::getInstance()->out(Color::Fg(200, "Database not found '{$exp}'."));
 				return;
 			}
+			
+			shell_exec("rm -f -r " . $dir);
 
-			exec("rm -f -r " . $dir);
-			$logger->success("Database excluded '{$exp}'.");
+			Printer::getInstance()->out(Color::Fg(100, "Database deleted '{$exp}'."));
+			Printer::getInstance()->out('');
 		}
 	}
 
