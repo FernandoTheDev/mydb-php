@@ -22,6 +22,15 @@ $cli->Register("help", function () use ($cli, $printer) {
     $printer->Display(trim($txt));
 });
 
+$cli->Register("init", function () use ($cli, $printer) {
+	$printer->Clear();
+	$printer->display(Color::Fg(82, "Initializing..."));
+
+	mkdir(__DIR__ . '/db');
+
+	$printer->Display(Color::Fg(82, "Initialized successfully."));
+});
+
 
 $cli->Register("query", function () use ($printer, $parser) {
 	$printer->newLine();
