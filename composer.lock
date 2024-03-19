@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "438559e693501dc9486b95852a7e050c",
+    "content-hash": "69671e8000ce5f4e8076b7513f65f6d5",
     "packages": [
         {
             "name": "php-parallel-lint/php-console-color",
