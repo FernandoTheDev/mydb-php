@@ -91,7 +91,7 @@ class Select
 
 			$this->especificWithWhere($selects, [$dbName, $tableName], $tableData, $whereField, $whereOperator, $whereValue);
 		} else {
-			$this->especific($selects, [$dbName, $tableName], $tableData);
+			$this->selectFields($selects, [$dbName, $tableName], $tableData);
 		}
 	}
 
@@ -111,19 +111,20 @@ class Select
 		Printer::getInstance()->newLine();
 	}
 
-	private function especific(array $selects, array $name, array $tableData): void
+	private function selectFields(array $fields, array $name, array $tableData): void
 	{
 		list($dbName, $tableName) = $name;
 
-		foreach ($selects as $select) {
-			if (isset($tableData["data"][$select])) {
-				Printer::getInstance()->out(Color::Bg(100, "{$select}:"));
-				foreach ($tableData["data"][$select] as $key => $value) {
-					echo "  - {$key}: {$value}\n";
+		foreach ($tableData["data"] as $columnData) {
+			$selectedData = array_intersect_key($columnData, array_flip($fields));
+			
+			if (!empty($selectedData)) {
+				foreach ($selectedData as $columnName => $fieldValue) {
+					Printer::getInstance()->out(Color::Bg(100, "$columnName:"));
+					Printer::getInstance()->out(Color::Bg(95, " {$fieldValue}"));
+					Printer::getInstance()->newLine();
 				}
-				echo PHP_EOL;
-			} else {
-				Printer::getInstance()->out(Color::Fg(88, "Field '{$select}' not found in table '{$dbName}.{$tableName}'."));
+				Printer::getInstance()->newLine();
 			}
 		}
 	}
