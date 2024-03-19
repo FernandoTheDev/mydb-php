@@ -91,7 +91,7 @@ class Select
 
 			$this->especificWithWhere($selects, [$dbName, $tableName], $tableData, $whereField, $whereOperator, $whereValue);
 		} else {
-			$this->selectFields($selects, [$dbName, $tableName], $tableData);
+			$this->selectFields($selects, $tableData);
 		}
 	}
 
@@ -111,9 +111,8 @@ class Select
 		Printer::getInstance()->newLine();
 	}
 
-	private function selectFields(array $fields, array $name, array $tableData): void
+	private function selectFields(array $fields, array $tableData): void
 	{
-		list($dbName, $tableName) = $name;
 
 		foreach ($tableData["data"] as $columnData) {
 			$selectedData = array_intersect_key($columnData, array_flip($fields));
