@@ -4,7 +4,7 @@ namespace Fernando\MyDB;
 
 use Fernando\MyDB\Cli\Color;
 use Fernando\MyDB\Cli\Printer;
-use Fernando\MyDB\Expressions\{
+use Fernando\MyDB\Expressions\ {
 	Show,
 	Select,
 	Create,
@@ -18,8 +18,12 @@ class Parser
 	private array $keywords = [];
 
 	public function __construct() {
+		if (!is_dir(__DIR__ . '/../db/')) {
+			mkdir(__DIR__ . '/../db/');
+		}
+		
 		$this->keywords = [
-			"SHOW"   => new Show,
+			"SHOW" => new Show,
 			"SELECT" => new Select,
 			"CREATE" => new Create,
 			"INSERT" => new Insert,

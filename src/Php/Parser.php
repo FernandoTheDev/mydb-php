@@ -15,6 +15,10 @@ final class Parser
 	private array $keywords = [];
 
 	public function __construct() {
+		if (!is_dir(__DIR__ . '/../../db/')) {
+			mkdir(__DIR__ . '/../../db/');
+		}
+
 		$this->keywords = [
 			"SELECT" => new Select,
 			"CREATE" => new Create,
