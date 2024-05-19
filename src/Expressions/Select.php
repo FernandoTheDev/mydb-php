@@ -100,9 +100,9 @@ class Select
 		list($dbName, $tableName) = $name;
 
 		foreach ($tableData["data"] as $columnName => $columnData) {
-			Printer::getInstance()->out(Color::Bg(100, "{$columnName}:"));
+			Printer::getInstance()->out(Color::Bg(100, "{$columnName}:") . PHP_EOL);
 			foreach ($columnData as $key => $value) {
-				echo "  - {$key}: {$value}\n";
+				echo " - {$key}: {$value}\n";
 			}
 			echo PHP_EOL;
 		}
@@ -157,7 +157,7 @@ class Select
 		foreach ($tableData["data"] as $columnName => $columnData) {
 			if (isset($columnData[$whereField]) && $this->evaluateCondition($columnData[$whereField], $whereOperator, $whereValue)) {
 				$fieldFound = true;
-				Printer::getInstance()->out(Color::Bg(100, "{$columnName}:"));
+				Printer::getInstance()->out(Color::Bg(100, "{$columnName}:") . PHP_EOL);
 				foreach ($selects as $select) {
 					if (isset($columnData[$select])) {
 						echo "  - {$select}: {$columnData[$select]}\n";

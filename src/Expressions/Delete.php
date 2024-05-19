@@ -14,7 +14,7 @@ class Delete
 	public function run(array $expression): void
 	{
 		if (count($expression) < 1) {
-			Printer::getInstance()->out(Color::Fg(200, "Invalid expression '{$expression}'."));
+			Printer::getInstance()->out(Color::Fg(200, "Invalid expression '" . implode(' ', $expression) . "'."));
 			return;
 		}
 
@@ -31,8 +31,9 @@ class Delete
 				array_shift($expression);
 				$this->table($expression);
 				break;
-			Printer::getInstance()->out(Color::Fg(88, "Comando inválido: '{$command}'."));
-			break;
+				default:
+				Printer::getInstance()->out(Color::Fg(88, "Comando inválido: '{$command}'."));
+				break;
 		}
 	}
 
@@ -69,7 +70,7 @@ class Delete
 				Printer::getInstance()->out(Color::Fg(200, "Database not found '{$exp}'."));
 				return;
 			}
-			
+
 			shell_exec("rm -f -r " . $dir);
 
 			Printer::getInstance()->out(Color::Fg(100, "Database deleted '{$exp}'."));

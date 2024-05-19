@@ -73,7 +73,7 @@ print_r($mydb->getData());
 
  Use in terminal, just run the parameterless **bin/mydb.php** file without parameters.
 ```bash
-php bin/mydb.php
+./mydb
 ```
 
 # Tests
@@ -82,11 +82,12 @@ Open the tests folder, you will see 3 tests that I did where I create Database a
 # Additional Information
 Because it is an interpreter, it executes line by line, and you can prepare several queries before finally executing, as I demonstrated in **tests/three.php**.
 
-## Author:
+## Authors:
 - [@fernandothedev](t.me/fernandothedev)
+- [@thevenrex](t.me/thevenrex)
 
 ## Suport
-If you want specific improvements in optimization, security and others, contact the **Author**
+If you want specific improvements in optimization, security and others, contact the **Authors**
 
 ## Installation 
 ### Composer

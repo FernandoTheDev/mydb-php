@@ -56,15 +56,13 @@ class Parser
 			}
 
 			if ($lastToken === "(" || $lastToken[0] === "(") {
-				echo "No ponteiro.\n";
-				
 				$inPointer = true;
 				$openInit = true;
 				$dataPointer[] = $value;
 				array_shift($expression);
 			}
 
-			if ($lastToken === ")" && $openInit) {
+			if ($lastToken === ")" || $lastToken[0] === ")" && $openInit) {
 				$inPointer = false;
 				$openInit = false;
 				$dataPointer[] = $value;

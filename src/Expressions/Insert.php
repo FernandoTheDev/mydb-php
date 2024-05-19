@@ -72,6 +72,10 @@ class Insert
 
 		$newExpression = [];
 
+		array_shift($columns);
+		array_shift($columns);
+		array_shift($columns);
+
 		foreach ($expression as $index) {
 			array_push($newExpression, $index);
 		}
@@ -92,13 +96,15 @@ class Insert
 			}
 
 			if (strlen($part) > 1 and $part[$i + 1] === ")") {
-		
 				$data[$columns[$i]] = str_replace(")", "", $part);
 				break;
 			}
 
 			$data[$columns[$i]] = str_replace(")", "", $part);
 		}
+
+
+		var_dump($columns);
 
 		if (count($data) !== count($columns)) {
 			Printer::getInstance()->out(Color::Fg(88, "Amount of data is different from " . count($columns) . "."));

@@ -29,8 +29,9 @@ class Create
 				array_shift($expression);
 				$this->createTable($expression);
 				break;
-			Printer::getInstance()->out(Color::Fg(88, "Comando inválido: '{$command}'."));
-			break;
+			default:
+				Printer::getInstance()->out(Color::Fg(88, "Comando inválido: '{$command}'."));
+				break;
 		}
 	}
 
@@ -66,10 +67,8 @@ class Create
 			return;
 		}
 
-		var_dump($expression);
-
 		$tableData = [];
-		
+
 		if ($expression[1] == "(") {
 			array_shift($expression);
 			$tableData = $this->parseTableData($expression);

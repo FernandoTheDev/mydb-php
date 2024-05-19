@@ -1,3 +1,4 @@
+#!/usr/bin/php
 <?php
 
 use Fernando\MyDB\Parser;
@@ -11,15 +12,15 @@ $cli = new App;
 $printer = $cli->GetPrinter();
 
 $cli->Register("help", function () use ($cli, $printer) {
-	$txt = Color::Fg(45, 'Usage: php mydb [command] [options]'). PHP_EOL;
-    $txt .= 'Available commands:'. PHP_EOL;
+	$txt = Color::Fg(45, 'Usage: php mydb [command] [options]') . PHP_EOL;
+	$txt .= 'Available commands:' . PHP_EOL;
 
-    foreach ($cli->GetAllCmds() as $i => $item) {
-        $txt .= ' - ' . Color::Fg(10, $i) . PHP_EOL;
-        unset($item);
-    }
+	foreach ($cli->GetAllCmds() as $i => $item) {
+		$txt .= ' - ' . Color::Fg(10, $i) . PHP_EOL;
+		unset ($item);
+	}
 
-    $printer->Display(trim($txt));
+	$printer->Display(trim($txt));
 });
 
 $cli->Register("init", function () use ($cli, $printer) {
@@ -32,42 +33,48 @@ $cli->Register("init", function () use ($cli, $printer) {
 });
 
 
-$cli->Register("query", function () use ($printer, $parser) {
-	$printer->newLine();
-	$printer->out(Color::Fg(82, "Enter your file: "));
-	$file = $printer->Read();
-
-	if (is_file($file)) {
-		$data = file_get_contents($file);
-		$parser->parserAndInterpreter($data);
-		exit();
+$cli->Register("query", function () use ($printer, $parser, $argv) {
+	if (count($argv) < 3 or count($argv) > 3) {
+		$printer->out(Color::Fg(99, "Usage: mydb query <FILE>"));
+		exit;
 	}
 
-	$printer->Display(Color::Fg(82, "File not found '{$file}'."));
+	if (is_file($argv[2])) {
+		$data = file_get_contents($argv[2]);
+		$parser->parserAndInterpreter($data);
+		exit;
+	}
+
+	$printer->Display(Color::Fg(82, "File not found '{$argv[1]}'."));
 });
 
 $cli->Register('exec', function () use ($printer, $parser) {
 	$printer->Clear(); // Clear the screen
 
 	while (true) {
-		$input = readline("mydb > ");
-	
+		$input = readline("mydb> ");
+
 		if ($input == "exit") {
 			$printer->newLine();
 			$printer->out(Color::Fg(99, "Bye!"));
 			break;
 		}
-		
+
+		if ($input == "clear") {
+			$printer->clear();
+			continue;
+		}
+
 		if (in_array($input, ["", " "])) {
 			continue;
 		}
-	
+
 		$printer->newLine();
 
 		$init = microtime(true);
 		$parser->parserAndInterpreter($input);
 		$end = microtime(true);
-	
+
 		$seconds = number_format($end - $init, 5);
 		$printer->newLine();
 		$printer->Display(Color::Fg(82, "Executed in {$seconds} seconds."));
