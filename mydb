@@ -50,8 +50,7 @@ $cli->Register('exec', function () use ($printer, $parser) {
 	$printer->Clear(); // Clear the screen
 
 	while (true) {
-		$printer->out(Color::Fg(82, "mydb> "));
-		$input = $printer->read();
+		$input = readline("mydb > ");
 	
 		if ($input == "exit") {
 			$printer->newLine();

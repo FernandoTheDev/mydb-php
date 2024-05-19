@@ -14,7 +14,7 @@ class Create
 	public function run(array $expression): void
 	{
 		if (count($expression) < 2) {
-			Printer::getInstance()->out(Color::Fg(200, "Invalid expression '{$expression}'."));
+			Printer::getInstance()->out(Color::Fg(200, "Invalid expression '" . implode(' ', $expression) . "'."));
 			return;
 		}
 
@@ -61,7 +61,15 @@ class Create
 			return;
 		}
 
+		if (count($expression) < 2) {
+			echo "Erro ao criar tabela: Expressão inválida.";
+			return;
+		}
+
+		var_dump($expression);
+
 		$tableData = [];
+		
 		if ($expression[1] == "(") {
 			array_shift($expression);
 			$tableData = $this->parseTableData($expression);

@@ -4,7 +4,7 @@ namespace Fernando\MyDB;
 
 use Fernando\MyDB\Cli\Color;
 use Fernando\MyDB\Cli\Printer;
-use Fernando\MyDB\Expressions\ {
+use Fernando\MyDB\Expressions\{
 	Show,
 	Select,
 	Create,
@@ -17,11 +17,12 @@ class Parser
 {
 	private array $keywords = [];
 
-	public function __construct() {
+	public function __construct()
+	{
 		if (!is_dir(__DIR__ . '/../db/')) {
 			mkdir(__DIR__ . '/../db/');
 		}
-		
+
 		$this->keywords = [
 			"SHOW" => new Show,
 			"SELECT" => new Select,
@@ -35,8 +36,8 @@ class Parser
 	public function parserAndInterpreter(string $expression): void
 	{
 		/**
-		* A Primeira expressão tem obrigatoriamente que ser um  Keyword ou um Comentário.
-		*/
+		 * A Primeira expressão tem obrigatoriamente que ser um  Keyword ou um Comentário.
+		 */
 		$expression = explode("\n", $expression);
 		$inPointer = false;
 		$dataPointer = [];
@@ -48,11 +49,6 @@ class Parser
 			$keyword = $tokens[0];
 			$lastToken = end($tokens);
 
-			if (in_array($value, ['', " "])) {
-				array_shift($expression);
-				continue;
-			}
-
 			/* Vamos ver se é um comentário */
 			if (in_array($keyword, ["#", "--", '', "\n"])) {
 				array_shift($expression);
@@ -60,11 +56,12 @@ class Parser
 			}
 
 			if ($lastToken === "(" || $lastToken[0] === "(") {
+				echo "No ponteiro.\n";
+				
 				$inPointer = true;
 				$openInit = true;
 				$dataPointer[] = $value;
 				array_shift($expression);
-				continue;
 			}
 
 			if ($lastToken === ")" && $openInit) {
