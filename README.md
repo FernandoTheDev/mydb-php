@@ -71,7 +71,7 @@ $mydb->execute();
 print_r($mydb->getData());
 ```
 
- Use in terminal, just run the parameterless **bin/mydb.php** file without parameters.
+ Use in terminal, just run the parameterless **./mydb.php** file without parameters.
 ```bash
 ./mydb
 ```
