@@ -17,7 +17,7 @@ $cli->Register("help", function () use ($cli, $printer) {
 
 	foreach ($cli->GetAllCmds() as $i => $item) {
 		$txt .= ' - ' . Color::Fg(10, $i) . PHP_EOL;
-		unset ($item);
+		unset($item);
 	}
 
 	$printer->Display(trim($txt));
@@ -49,7 +49,7 @@ $cli->Register("query", function () use ($printer, $parser, $argv) {
 });
 
 $cli->Register('exec', function () use ($printer, $parser) {
-	$printer->Clear(); // Clear the screen
+	$printer->Clear();
 
 	while (true) {
 		$input = readline("mydb> ");
@@ -84,4 +84,3 @@ $cli->Register('exec', function () use ($printer, $parser) {
 
 
 $cli->Run($argv);
-
