@@ -1,4 +1,4 @@
-#!/usr/bin/php
+#!/usr/bin/env php
 <?php
 
 use Fernando\MyDB\Parser;
@@ -20,16 +20,16 @@ $cli->Register("help", function () use ($cli, $printer) {
 		unset($item);
 	}
 
-	$printer->Display(trim($txt));
+	$printer->out(trim($txt));
 });
 
 $cli->Register("init", function () use ($cli, $printer) {
 	$printer->Clear();
-	$printer->display(Color::Fg(82, "Initializing..."));
+	$printer->out(Color::Fg(82, "Initializing..."));
 
 	mkdir(__DIR__ . '/db');
 
-	$printer->Display(Color::Fg(82, "Initialized successfully."));
+	$printer->out(Color::Fg(82, "Initialized successfully."));
 });
 
 
@@ -45,17 +45,16 @@ $cli->Register("query", function () use ($printer, $parser, $argv) {
 		exit;
 	}
 
-	$printer->Display(Color::Fg(82, "File not found '{$argv[1]}'."));
+	$printer->out(Color::Fg(82, "File not found '{$argv[1]}'."));
 });
 
 $cli->Register('exec', function () use ($printer, $parser) {
-	$printer->Clear();
+	$printer->Clear(); // Clear the screen
 
 	while (true) {
 		$input = readline("mydb> ");
 
 		if ($input == "exit") {
-			$printer->newLine();
 			$printer->out(Color::Fg(99, "Bye!"));
 			break;
 		}
@@ -69,15 +68,12 @@ $cli->Register('exec', function () use ($printer, $parser) {
 			continue;
 		}
 
-		$printer->newLine();
-
 		$init = microtime(true);
 		$parser->parserAndInterpreter($input);
 		$end = microtime(true);
 
-		$seconds = number_format($end - $init, 5);
-		$printer->newLine();
-		$printer->Display(Color::Fg(82, "Executed in {$seconds} seconds."));
+		$seconds = number_format($end - $init, 2);
+		$printer->out(Color::Fg(82, "Executed in {$seconds} seconds."));
 	}
 
 });

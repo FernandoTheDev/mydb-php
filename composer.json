@@ -2,6 +2,7 @@
 	"name": "fernandothedev/mydb-php",
 	"description": "MyDB is a relational database based on JSON and Open Source, written 100% in PHP and from absolute zero, aims to guarantee speed and simplicity in its execution, with some SQL expressions changed.",
 	"type": "project",
+	"version": "0.1.0",
 	"minimum-stability": "stable",
 	"license": "MIT",
 	"autoload": {
@@ -14,6 +15,10 @@
 			"name": "Fernando",
 			"email": "fernandolovephp@gmail.com"
 		}
+	],
+
+	"bin": [
+		"bin/mydb"
 	],
 	"require": {
 		"php-parallel-lint/php-console-color": "^1.0"
