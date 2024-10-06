@@ -5,7 +5,7 @@ use Fernando\MyDB\Parser;
 use Fernando\MyDB\Cli\App;
 use Fernando\MyDB\Cli\Color;
 
-require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
 $parser = new Parser();
 $cli = new App;
