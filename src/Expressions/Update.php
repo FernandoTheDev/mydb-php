@@ -82,7 +82,6 @@ class Update
 	{
 		$whereData = [];
 		$currentIndex = $whereIndex + 1;
-
 		while ($currentIndex < count($expression)) {
 			$field = $expression[$currentIndex];
 			$operator = $expression[$currentIndex + 1];
@@ -100,7 +99,6 @@ class Update
 				break;
 			}
 		}
-
 		return $whereData;
 	}
 

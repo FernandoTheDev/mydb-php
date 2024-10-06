@@ -2,3 +2,4 @@ vendor/*
 db/*
 composer.json
 teste.mydb
+hack

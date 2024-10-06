@@ -105,7 +105,7 @@ Because it is an interpreter, it executes line by line, and you can prepare seve
 
 If you want specific improvements in optimization, security and others, contact the **Authors**
 
-## Installation 
+## Installation
 
 ### Composer
 

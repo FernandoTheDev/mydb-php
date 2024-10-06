@@ -9,14 +9,14 @@ class Printer
 
     protected static ?Printer $printer = null;
 
-	public static function getInstance(): Printer
-	{
-		if (!self::$printer instanceof Printer) {
-			self::$printer = new Printer();
-		}
+    public static function getInstance(): Printer
+    {
+        if (!self::$printer instanceof Printer) {
+            self::$printer = new Printer();
+        }
 
-		return self::$printer;
-	}
+        return self::$printer;
+    }
 
     public function out(string $text): Printer
     {

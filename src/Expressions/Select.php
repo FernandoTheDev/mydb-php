@@ -56,8 +56,8 @@ class Select
 		}
 
 		$data = $this->getDatabaseAndTableName($table);
-	    $tableName = $data[1] ?? '';
-	    $dbName = $data[0] ?? '';
+		$tableName = $data[1] ?? '';
+		$dbName = $data[0] ?? '';
 
 		if (!is_dir($this->dirBase . $dbName)) {
 			Printer::getInstance()->out(Color::Fg(88, "Database not exists '{$dbName}'."));

@@ -4,7 +4,11 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
+<<<<<<< HEAD
     "content-hash": "d3c5a1266aabe855ab842ba1edab9d35",
+=======
+    "content-hash": "69671e8000ce5f4e8076b7513f65f6d5",
+>>>>>>> 1945b4fad0dc056b566d1b08a0dc405a9c75af28
     "packages": [
         {
             "name": "php-parallel-lint/php-console-color",
@@ -54,6 +58,7 @@
                 "source": "https://github.com/php-parallel-lint/PHP-Console-Color/tree/v1.0.1"
             },
             "time": "2021-12-25T06:49:29+00:00"
+<<<<<<< HEAD
         },
         {
             "name": "psr/container",
@@ -755,6 +760,8 @@
                 }
             ],
             "time": "2024-07-22T10:25:37+00:00"
+=======
+>>>>>>> 1945b4fad0dc056b566d1b08a0dc405a9c75af28
         }
     ],
     "packages-dev": [],
