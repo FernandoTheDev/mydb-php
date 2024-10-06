@@ -116,7 +116,7 @@ class Select
 
 		foreach ($tableData["data"] as $columnData) {
 			$selectedData = array_intersect_key($columnData, array_flip($fields));
-			
+
 			if (!empty($selectedData)) {
 				foreach ($selectedData as $columnName => $fieldValue) {
 					Printer::getInstance()->out(Color::Bg(100, "$columnName:"));

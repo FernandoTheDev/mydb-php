@@ -114,7 +114,7 @@ class Parser
 				continue;
 			}
 
-			/* Não identificado. */
+			/* Não identificado.  */
 			Printer::getInstance()->Display(Color::Fg(196, "Keyword '{$keyword}' not found."));
 			array_shift($expression);
 		}

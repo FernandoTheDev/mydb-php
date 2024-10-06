@@ -31,7 +31,7 @@ class Delete
 				array_shift($expression);
 				$this->table($expression);
 				break;
-				default:
+			default:
 				Printer::getInstance()->out(Color::Fg(88, "Comando inválido: '{$command}'."));
 				break;
 		}

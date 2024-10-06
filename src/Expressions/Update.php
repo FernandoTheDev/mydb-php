@@ -76,9 +76,11 @@ class Update
 			$field = $expression[$currentIndex];
 			$operator = $expression[$currentIndex + 1];
 			$value = $expression[$currentIndex + 2];
-			$whereData[] = [$field,
+			$whereData[] = [
+				$field,
 				$operator,
-				$value];
+				$value
+			];
 			$currentIndex += 4;
 			if ($currentIndex < count($expression) && strtoupper($expression[$currentIndex]) === 'AND') {
 				$currentIndex++;

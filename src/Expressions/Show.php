@@ -31,9 +31,9 @@ class Show
 				array_shift($expression);
 				$this->showTable($expression);
 				break;
-				default:
-			Printer::getInstance()->display(Color::Bg(205, "Invalid parameter '{$command}'."));
-			break;
+			default:
+				Printer::getInstance()->display(Color::Bg(205, "Invalid parameter '{$command}'."));
+				break;
 		}
 	}
 
