@@ -32,7 +32,7 @@ class Delete
 				$this->table($expression);
 				break;
 			default:
-				Printer::getInstance()->out(Color::Fg(88, "Comando inválido: '{$command}'."));
+				Printer::getInstance()->out(Color::Fg(88, "Invalid command '{$command}'."));
 				break;
 		}
 	}
@@ -60,6 +60,31 @@ class Delete
 		}
 	}
 
+	private function deleteDirectory(string $dir): bool
+	{
+		if (!file_exists($dir)) {
+			return false;
+		}
+
+		if (!is_dir($dir)) {
+			return false;
+		}
+
+		$files = array_diff(scandir($dir), array('.', '..'));
+
+		foreach ($files as $file) {
+			$filePath = $dir . DIRECTORY_SEPARATOR . $file;
+
+			if (is_dir($filePath)) {
+				$this->deleteDirectory($filePath);
+			} else {
+				unlink($filePath);
+			}
+		}
+
+		return rmdir($dir);
+	}
+
 	private function database(array $expression): void
 	{
 
@@ -71,10 +96,8 @@ class Delete
 				return;
 			}
 
-			shell_exec("rm -f -r " . $dir);
-
+			$this->deleteDirectory($dir);
 			Printer::getInstance()->out(Color::Fg(100, "Database deleted '{$exp}'."));
-			Printer::getInstance()->out('');
 		}
 	}
 

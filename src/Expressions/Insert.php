@@ -20,7 +20,7 @@ class Insert
 		}
 
 		if (strtoupper($expression[0]) !== "INTO") {
-			Printer::getInstance()->out(Color::Fg(200, "Invalid expression '$expression[0]'"));
+			Printer::getInstance()->out(Color::Fg(200, "Invalid expression '$expression[0]', expect 'INTO'"));
 			Printer::getInstance()->newLine();
 			return;
 		}
@@ -32,7 +32,7 @@ class Insert
 		}
 
 		if (strtoupper($expression[2]) !== "VALUES") {
-			Printer::getInstance()->out(Color::Fg(200, "Invalid expression '$expression[2]'"));
+			Printer::getInstance()->out(Color::Fg(200, "Invalid expression '$expression[2]', expect 'VALUES'"));
 			Printer::getInstance()->newLine();
 			return;
 		}
@@ -72,10 +72,6 @@ class Insert
 
 		$newExpression = [];
 
-		array_shift($columns);
-		array_shift($columns);
-		array_shift($columns);
-
 		foreach ($expression as $index) {
 			array_push($newExpression, $index);
 		}
@@ -100,11 +96,8 @@ class Insert
 				break;
 			}
 
-			$data[$columns[$i]] = str_replace(")", "", $part);
+			$data[$i] = str_replace(")", "", $part);
 		}
-
-
-		var_dump($columns);
 
 		if (count($data) !== count($columns)) {
 			Printer::getInstance()->out(Color::Fg(88, "Amount of data is different from " . count($columns) . "."));
@@ -115,8 +108,6 @@ class Insert
 		$tableData['data'][] = $data;
 		file_put_contents($tableFile, json_encode($tableData, JSON_PRETTY_PRINT));
 		Printer::getInstance()->out(Color::Fg(200, "Inserted value in table '{$tableName}'."));
-		Printer::getInstance()->newLine();
-
 	}
 
 	private function getDatabaseAndTableName(string $expression): array

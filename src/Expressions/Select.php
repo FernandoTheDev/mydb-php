@@ -4,7 +4,8 @@ namespace Fernando\MyDB\Expressions;
 
 use Fernando\MyDB\Cli\{
 	Color,
-	Printer
+	Printer,
+	ConsoleTable
 };
 
 class Select
@@ -54,7 +55,9 @@ class Select
 			return;
 		}
 
-		list($dbName, $tableName) = $this->getDatabaseAndTableName($table);
+		$data = $this->getDatabaseAndTableName($table);
+		$tableName = $data[1] ?? '';
+		$dbName = $data[0] ?? '';
 
 		if (!is_dir($this->dirBase . $dbName)) {
 			Printer::getInstance()->out(Color::Fg(88, "Database not exists '{$dbName}'."));
@@ -97,35 +100,41 @@ class Select
 
 	private function all(array $name, array $expression, array $tableData): void
 	{
-		list($dbName, $tableName) = $name;
-
-		foreach ($tableData["data"] as $columnName => $columnData) {
-			Printer::getInstance()->out(Color::Bg(100, "{$columnName}:") . PHP_EOL);
-			foreach ($columnData as $key => $value) {
-				echo " - {$key}: {$value}\n";
-			}
-			echo PHP_EOL;
+		$table = new ConsoleTable();
+		$table->setHeaders($tableData["columns"]);
+		foreach ($tableData["data"] as $row) {
+			$table->addRow($row);
 		}
-
-		Printer::getInstance()->out(Color::Bg(100, "All table data from '{$dbName}.{$tableName}'."));
-		Printer::getInstance()->newLine();
+		$table->render();
 	}
 
 	private function selectFields(array $fields, array $tableData): void
 	{
-
-		foreach ($tableData["data"] as $columnData) {
-			$selectedData = array_intersect_key($columnData, array_flip($fields));
-
-			if (!empty($selectedData)) {
-				foreach ($selectedData as $columnName => $fieldValue) {
-					Printer::getInstance()->out(Color::Bg(100, "$columnName:"));
-					Printer::getInstance()->out(Color::Bg(95, " {$fieldValue}"));
-					Printer::getInstance()->newLine();
-				}
-				Printer::getInstance()->newLine();
+		$columnIndexes = [];
+		foreach ($fields as $field) {
+			$index = array_search($field, $tableData['columns']);
+			if ($index !== false) {
+				$columnIndexes[] = $index;
+			} else {
+				$columnIndexes[] = -1;
 			}
 		}
+		$table = new ConsoleTable();
+		$table->setHeaders($fields);
+
+		foreach ($tableData['data'] as $row) {
+			$filteredRow = [];
+			foreach ($columnIndexes as $index) {
+				if ($index === -1) {
+					$filteredRow[] = 'N/A';
+				} else {
+					$filteredRow[] = $row[$index] ?? 'N/A';
+				}
+			}
+			$table->addRow($filteredRow);
+		}
+
+		$table->render();
 	}
 
 	private function allWithWhere(array $name, array $tableData, string $whereField, string $whereOperator, string $whereValue): void
@@ -133,52 +142,45 @@ class Select
 		list($dbName, $tableName) = $name;
 		$fieldFound = false;
 
-		foreach ($tableData["data"] as $columnName => $columnData) {
-			if (isset($columnData[$whereField]) && $this->evaluateCondition($columnData[$whereField], $whereOperator, $whereValue)) {
+		$whereColumnIndex = array_search($whereField, $tableData['columns']);
+
+		if ($whereColumnIndex === false) {
+			Printer::getInstance()->out(Color::Fg(88, "Field '{$whereField}' not found in columns."));
+			return;
+		}
+
+		$table = new ConsoleTable();
+		$table->setHeaders($tableData['columns']);
+
+		foreach ($tableData['data'] as $row) {
+			$fieldValue = $row[$whereColumnIndex];
+
+			// Debug para verificar valores e estrutura de dados
+			// echo "Campo WHERE: '{$whereField}', Valor do campo: '{$fieldValue}', Valor esperado: '{$whereValue}'\n";
+			// echo "Dados da linha: " . json_encode($row) . "\n";
+
+			if ($this->evaluateCondition($fieldValue, $whereOperator, $whereValue)) {
 				$fieldFound = true;
-				Printer::getInstance()->out(Color::Bg(100, "{$columnName}:"));
-				foreach ($columnData as $cK => $cD) {
-					echo "  - {$cK}: {$cD}\n";
-				}
-				echo PHP_EOL;
+				$table->addRow($row);
 			}
 		}
 
-		if (!$fieldFound) {
-			Printer::getInstance()->out(Color::Fg(88, "No data was found for the condition '{$whereField} {$whereOperator} {$whereValue}' in '{$dbName}.{$tableName}'."));
-		}
-	}
-
-	private function especificWithWhere(array $selects, array $name, array $tableData, string $whereField, string $whereOperator, string $whereValue): void
-	{
-		list($dbName, $tableName) = $name;
-		$fieldFound = false;
-
-		foreach ($tableData["data"] as $columnName => $columnData) {
-			if (isset($columnData[$whereField]) && $this->evaluateCondition($columnData[$whereField], $whereOperator, $whereValue)) {
-				$fieldFound = true;
-				Printer::getInstance()->out(Color::Bg(100, "{$columnName}:") . PHP_EOL);
-				foreach ($selects as $select) {
-					if (isset($columnData[$select])) {
-						echo "  - {$select}: {$columnData[$select]}\n";
-					} else {
-						echo "Campo '{$select}' não encontrado em '{$dbName}.{$tableName}'.\n";
-					}
-				}
-				echo PHP_EOL;
-			}
-		}
-
-		if (!$fieldFound) {
+		if ($fieldFound) {
+			$table->render();
+		} else {
 			Printer::getInstance()->out(Color::Fg(88, "No data was found for the condition '{$whereField} {$whereOperator} {$whereValue}' in '{$dbName}.{$tableName}'."));
 		}
 	}
 
 	private function evaluateCondition(string $fieldValue, string $operator, string $value): bool
 	{
+		// Garante que ambos os valores sejam comparados como strings para evitar problemas de tipo
+		$fieldValue = (string) $fieldValue;
+		$value = (string) $value;
+
 		switch ($operator) {
 			case "=":
-				return $fieldValue == $value;
+				return $fieldValue === $value;
 			case "<":
 				return $fieldValue < $value;
 			case ">":
@@ -192,6 +194,56 @@ class Select
 		}
 	}
 
+	private function especificWithWhere(array $selects, array $name, array $tableData, string $whereField, string $whereOperator, string $whereValue): void
+	{
+		list($dbName, $tableName) = $name;
+		$fieldFound = false;
+
+		$columnIndexes = [];
+		foreach ($selects as $select) {
+			$index = array_search($select, $tableData['columns']);
+			if ($index !== false) {
+				$columnIndexes[] = $index;
+			} else {
+				$columnIndexes[] = -1;
+			}
+		}
+
+		$table = new ConsoleTable();
+		$table->setHeaders($selects);
+
+		foreach ($tableData['data'] as $row) {
+			$whereColumnIndex = array_search($whereField, $tableData['columns']);
+
+			if ($whereColumnIndex !== false) {
+				$fieldValue = $row[$whereColumnIndex];
+
+				// Debug temporário para verificar valores
+				// echo "Comparando '{$fieldValue}' com '{$whereValue}' usando operador '{$whereOperator}'\n";
+
+				if ($this->evaluateCondition($fieldValue, $whereOperator, $whereValue)) {
+					$fieldFound = true;
+
+					$filteredRow = [];
+					foreach ($columnIndexes as $index) {
+						if ($index === -1) {
+							$filteredRow[] = 'N/A';
+						} else {
+							$filteredRow[] = $row[$index] ?? 'N/A';
+						}
+					}
+					$table->addRow($filteredRow);
+				}
+			}
+		}
+
+		if ($fieldFound) {
+			$table->render();
+		} else {
+			Printer::getInstance()->out(Color::Fg(88, "No data was found for the condition '{$whereField} {$whereOperator} {$whereValue}' in '{$dbName}.{$tableName}'."));
+		}
+	}
+
 	private function getDatabaseAndTableName(string $expression): array
 	{
 		return explode(".", $expression);
@@ -199,7 +251,6 @@ class Select
 
 	private function isValidWhereClause(array $expression, int $whereIndex): bool
 	{
-		// Verifica se há ao menos 3 tokens após WHERE e se o segundo e terceiro tokens formam uma expressão válida
 		return isset($expression[$whereIndex + 3]) && in_array(strtoupper($expression[$whereIndex + 2]), ['=', '<', '>', '<=', '>=']);
 	}
 }

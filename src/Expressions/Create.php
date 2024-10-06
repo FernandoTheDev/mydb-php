@@ -30,7 +30,7 @@ class Create
 				$this->createTable($expression);
 				break;
 			default:
-				Printer::getInstance()->out(Color::Fg(88, "Comando inválido: '{$command}'."));
+				Printer::getInstance()->out(Color::Fg(88, "Invalid command '{$command}'."));
 				break;
 		}
 	}
@@ -63,7 +63,7 @@ class Create
 		}
 
 		if (count($expression) < 2) {
-			echo "Erro ao criar tabela: Expressão inválida.";
+			Printer::getInstance()->out(Color::Fg(88, "Expression invalid '" . implode(" ", $expression) . "'."));
 			return;
 		}
 

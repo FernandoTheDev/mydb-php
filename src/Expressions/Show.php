@@ -4,7 +4,8 @@ namespace Fernando\MyDB\Expressions;
 
 use Fernando\MyDB\Cli\{
 	Color,
-	Printer
+	Printer,
+	ConsoleTable
 };
 
 class Show
@@ -32,7 +33,7 @@ class Show
 				$this->showTable($expression);
 				break;
 			default:
-				Printer::getInstance()->display(Color::Bg(205, "Invalid parameter '{$command}'."));
+				Printer::getInstance()->display(Color::Fg(205, "Invalid parameter '{$command}'."));
 				break;
 		}
 	}
@@ -43,18 +44,21 @@ class Show
 		array_shift($folders);
 		array_shift($folders);
 
-		if (count($folders) == 0) {
-			Printer::getInstance()->display(Color::Bg(106, "We don't have databases to show."));
+		$foldersCount = count($folders);
+
+		if ($foldersCount == 0) {
+			Printer::getInstance()->out(Color::Fg(106, "We don't have databases to show."));
 			return;
 		}
 
+		$table = new ConsoleTable();
+		$table->setHeaders(['Database']);
+
 		foreach ($folders as $folder) {
-			Printer::getInstance()->out(Color::Bg(201, "- " . $folder));
-			Printer::getInstance()->newLine();
+			$table->addRow([$folder]);
 		}
 
-		Printer::getInstance()->newLine();
-		Printer::getInstance()->out(Color::Bg(100, "Databases Total '" . count($folders) . "'."));
+		$table->render();
 	}
 
 	private function showTable(array $expression): void
@@ -63,66 +67,57 @@ class Show
 		$folders = scandir($dir);
 		$filesQtd = 0;
 
-		if (!count($expression) < 1) {
-			$files = scandir($dir . $expression[0] . '/');
-			array_shift($files);
-			array_shift($files);
+		if (isset($expression[0])) {
+			$database = $expression[0];
+			if (is_dir($dir . $database)) {
+				$files = scandir($dir . $database . '/');
+				array_shift($files);
+				array_shift($files);
 
-			if (count($files) == 0) {
-				Printer::getInstance()->display(Color::Bg(106, "We don't have tables to show."));
+				$table = new ConsoleTable();
+				$table->setHeaders(['Tables']);
+
+				foreach ($files as $file) {
+					if ($file !== '.' && $file !== '..') {
+						$file = str_replace(".json", "", $file);
+						$table->addRow([$file]);
+					}
+				}
+
+				$table->render();
+				Printer::getInstance()->out(Color::Fg(100, "Tables Total '" . count($files) . "' in database '{$database}'."));
+				return;
+			} else {
+				Printer::getInstance()->out(Color::Fg(106, "Database '{$database}' does not exist."));
 				return;
 			}
-
-			Printer::getInstance()->display(Color::Bg(2, $expression[0]));
-
-			foreach ($files as $file) {
-				$file = str_replace(".json", "", $file);
-				Printer::getInstance()->display(Color::Bg(205, "   - " . $file));
-			}
-			Printer::getInstance()->newLine();
-			Printer::getInstance()->display(Color::Bg(100, "Tables Total '" . count($files) . "'."));
-			return;
 		}
 
 		array_shift($folders);
 		array_shift($folders);
 
 		if (count($folders) == 0) {
-			Printer::getInstance()->display(Color::Bg(106, "We don't have databases to show."));
+			Printer::getInstance()->display(Color::Fg(106, "We don't have databases to show."));
 			return;
 		}
+
+		$table = new ConsoleTable();
+		$table->setHeaders(['Database', 'Tables']);
 
 		foreach ($folders as $folder) {
 			$files = scandir($dir . $folder);
 			array_shift($files);
 			array_shift($files);
-			$filesQtd += count($files);
+			$filesQtd = count($files);
 
-			if (count($files) < 1) {
-				Printer::getInstance()->out(Color::Bg(201, "- " . $folder));
-				Printer::getInstance()->newLine();
-				continue;
+			if ($filesQtd > 0) {
+				$table->addRow([$folder, $filesQtd]);
+			} else {
+				$table->addRow([$folder, 'No tables']);
 			}
-
-			Printer::getInstance()->out(Color::Bg(201, "- " . $folder));
-
-			foreach ($files as $file) {
-				if ($file == "") {
-					continue;
-				}
-				$file = str_replace(".json", "", $file);
-				Printer::getInstance()->newLine();
-				Printer::getInstance()->out(Color::Bg(205, "   - " . $file));
-			}
-			Printer::getInstance()->newLine();
 		}
 
-		$foldersCount = count($folders);
-
-		Printer::getInstance()->newLine();
-		Printer::getInstance()->out(Color::Bg(100, "Tables Total '{$filesQtd}'."));
-		Printer::getInstance()->newLine();
-		Printer::getInstance()->out(Color::Bg(100, "Databases Total '{$foldersCount}'."));
+		$table->render();
 	}
 
 	private function parseTableData(array $expression): array

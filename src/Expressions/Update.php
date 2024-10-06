@@ -7,7 +7,6 @@ use Fernando\MyDB\Cli\{
 	Printer
 };
 
-
 class Update
 {
 	private string $reservedWordSet = "SET";
@@ -16,8 +15,9 @@ class Update
 
 	public function run(array $expression, ?string $databaseName = ""): void
 	{
+		// echo "Expression: " . var_export($expression, true) . "\n";
 		if (empty($expression)) {
-			Printer::getInstance()->display("Invalid expression '{$expression}'.");
+			Printer::getInstance()->out("Invalid expression.");
 			return;
 		}
 
@@ -27,19 +27,19 @@ class Update
 		$currentIndex = 0;
 
 		while ($currentIndex < count($expression)) {
-			$keyword = $expression[$currentIndex];
+			$keyword = strtoupper($expression[$currentIndex]);
 
-			switch (strtoupper($keyword)) {
+			switch ($keyword) {
 				case $this->reservedWordSet:
 					$setData = $this->parseSetData($expression, $currentIndex);
-					$currentIndex += count($setData) * 3 + 1;
+					$currentIndex += count($setData) * 3 + 1; // Ajustar incremento
 					break;
 				case $this->reservedWordWhere:
 					$whereData = $this->parseWhereData($expression, $currentIndex);
-					$currentIndex += count($whereData) * 4 + 1;
+					$currentIndex += count($whereData) * 4 + 1; // Ajustar incremento
 					break;
 				default:
-					if ($table === "") {
+					if (empty($table)) {
 						$table = $keyword;
 					}
 					$currentIndex++;
@@ -47,24 +47,34 @@ class Update
 			}
 		}
 
-		$this->processUpdate($table, $setData, $whereData, $databaseName);
-		return;
-
+		$d = $this->getDatabaseAndTableName($expression[0]);
+		$this->processUpdate($d[1], $setData, $whereData, $d[0]);
 	}
 
 	private function parseSetData(array $expression, int $setIndex): array
 	{
 		$setData = [];
 		$currentIndex = $setIndex + 1;
+
 		while ($currentIndex < count($expression) && strtoupper($expression[$currentIndex]) !== $this->reservedWordWhere) {
 			$field = $expression[$currentIndex];
-			$value = $expression[$currentIndex + 2];
-			$setData[$field] = $value;
-			$currentIndex += 3;
-			if ($currentIndex < count($expression) && strtoupper($expression[$currentIndex]) === ',') {
-				$currentIndex++;
+
+			if (isset($expression[$currentIndex + 1]) && strtoupper($expression[$currentIndex + 1]) === '=') {
+				$value = $expression[$currentIndex + 2];
+				$value = rtrim($value, ',');
+				$setData[$field] = $value;
+				$currentIndex += 3;
+
+				if ($currentIndex < count($expression)) {
+					while ($currentIndex < count($expression) && strtoupper($expression[$currentIndex]) === ',') {
+						$currentIndex++;
+					}
+				}
+			} else {
+				break;
 			}
 		}
+
 		return $setData;
 	}
 
@@ -76,12 +86,13 @@ class Update
 			$field = $expression[$currentIndex];
 			$operator = $expression[$currentIndex + 1];
 			$value = $expression[$currentIndex + 2];
-			$whereData[] = [
-				$field,
-				$operator,
-				$value
-			];
+
+			// Debugging
+			// Printer::getInstance()->out("Parsed where data: $field $operator $value");
+
+			$whereData[] = [$field, $operator, $value];
 			$currentIndex += 4;
+
 			if ($currentIndex < count($expression) && strtoupper($expression[$currentIndex]) === 'AND') {
 				$currentIndex++;
 			} else {
@@ -93,18 +104,18 @@ class Update
 
 	private function processUpdate(string $tableName, array $setData, array $whereData, ?string $databaseName = ""): void
 	{
-		if ($databaseName == "") {
+		if (empty($databaseName)) {
 			list($dbName, $tableName) = $this->getDatabaseAndTableName($tableName);
 
 			if (!is_dir($this->dirBase . $dbName)) {
-				Printer::getInstance()->display(Color::Bg(200, "Database not exists '{$dbName}'."));
+				Printer::getInstance()->out(Color::Bg(200, "Database does not exist '{$dbName}'."));
 				return;
 			}
 		} else {
 			$dbName = $databaseName;
 
 			if (!is_dir($this->dirBase . $dbName)) {
-				Printer::getInstance()->display(Color::Bg(200, "Database not exists '{$dbName}'."));
+				Printer::getInstance()->out(Color::Bg(200, "Database does not exist '{$dbName}'."));
 				return;
 			}
 		}
@@ -112,40 +123,68 @@ class Update
 		$tableFile = $this->dirBase . $dbName . '/' . $tableName . '.json';
 
 		if (!file_exists($tableFile)) {
-			Printer::getInstance()->display(Color::Bg(200, "Table not exists '{$dbName}.{$tableName}'."));
+			Printer::getInstance()->out(Color::Bg(200, "Table does not exist '{$dbName}.{$tableName}'."));
 			return;
 		}
 
 		$tableData = json_decode(file_get_contents($tableFile), true);
 
+		if ($tableData === null) {
+			Printer::getInstance()->out(Color::Bg(200, "Error decoding JSON from table file '{$tableFile}'."));
+			return;
+		}
+
 		$this->performUpdate($tableData, $setData, $whereData, $tableFile);
+	}
+
+	private function getColumnMapping(array $tableData): array
+	{
+		$mapping = [];
+		foreach ($tableData["columns"] as $index => $column) {
+			$mapping[$column] = $index;
+		}
+		return $mapping;
 	}
 
 	private function performUpdate(array &$tableData, array $setData, array $whereData, string $tableFile): void
 	{
+		$columnMapping = $this->getColumnMapping($tableData);
+
 		foreach ($tableData["data"] as &$row) {
 			$updateRow = true;
 			foreach ($whereData as $condition) {
 				list($field, $operator, $value) = $condition;
-				if (!$this->evaluateCondition($row[$field], $operator, $value)) {
+
+				if (!isset($columnMapping[$field])) {
+					$updateRow = false;
+					break;
+				}
+
+				$fieldValue = $row[$columnMapping[$field]];
+
+				if (!$this->evaluateCondition($fieldValue, $operator, $value)) {
 					$updateRow = false;
 					break;
 				}
 			}
 			if ($updateRow) {
 				foreach ($setData as $field => $value) {
-					$row[$field] = $value;
+					if (isset($columnMapping[$field])) {
+						$row[$columnMapping[$field]] = $value;
+					}
 				}
 			}
 		}
 
-		Printer::getInstance()->display(Color::Bg(100, "Updated successfully."));
-
+		Printer::getInstance()->out(Color::Bg(100, "Updated successfully."));
 		file_put_contents($tableFile, json_encode($tableData, JSON_PRETTY_PRINT));
 	}
 
-	private function evaluateCondition(string $fieldValue, string $operator, string $value): bool
+	private function evaluateCondition($fieldValue, string $operator, $value): bool
 	{
+		// Debugging
+		// Printer::getInstance()->out("Evaluating condition: $fieldValue $operator $value");
+
 		switch ($operator) {
 			case "=":
 				return $fieldValue == $value;
