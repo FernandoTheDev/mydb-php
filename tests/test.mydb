@@ -1,0 +1,36 @@
+-- Me execute em terminal
+
+CREATE DATABASE fernando
+
+CREATE TABLE fernando.users (
+    user,
+    name
+)
+
+INSERT INTO fernando.users VALUES (
+    midia_22,
+    Midia
+)
+
+INSERT INTO fernando.users VALUES (
+    fernandothedev,
+    Fernando
+)
+
+INSERT INTO fernando.users VALUES (
+    uite,
+    Uite
+)
+
+SELECT * FROM fernando.users
+
+UPDATE fernando.users SET user = Fernando, name = fernandothedev WHERE user = fernandothedev
+
+SELECT * FROM fernando.users
+
+SELECT user FROM fernando.users WHERE name = fernandothedev
+SELECT * FROM fernando.users WHERE name = fernandothedev
+
+SHOW DATABASES
+SHOW TABLES
+SHOW TABLES fernando
